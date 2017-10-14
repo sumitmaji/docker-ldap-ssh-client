@@ -46,8 +46,9 @@ RUN echo "ldap-auth-config ldap-auth-config/move-to-debconf boolean true" | debc
 RUN echo "ldap-auth-config ldap-auth-config/ldapns/base-dn string dc=cloud,dc=com" | debconf-set-selections
 RUN echo "ldap-auth-config ldap-auth-config/rootbinddn string cn=admin,dc=cloud,dc=com" | debconf-set-selections
 
-RUN LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes ldap-auth-client nscd
-RUN auth-client-config -t nss -p lac_ldap
+ADD krb-ldap-config /etc/auth-client-config/profile.d/krb-ldap-config
+RUN apt-get install -yq ldap-auth-client nscd krb5-user libpam-krb5 libpam-ccreds
+RUN auth-client-config -a -p krb_ldap
 ADD setupClient.sh /etc/setupClient.sh
 RUN /bin/bash -c "/etc/setupClient.sh"
 ADD ldap.secret /etc/ldap.secret
