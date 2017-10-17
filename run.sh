@@ -1,2 +1,2 @@
 #!/bin/bash
-docker run -it -d --name ldap-client -h ldap-client --net cloud.com sumit/ldap-client /bin/bash
+docker run -it --name ldap-client -h ldap-client.cloud.com --net cloud.com sumit/ldap-client /bin/bash
