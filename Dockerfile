@@ -10,7 +10,6 @@ ARG LDAP_ORG=CloudInc
 ARG LDAP_HOSTNAME=ldap.cloud.com
 ARG LDAP_PASSWORD=sumit
 
-ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
 # Keep upstart from complaining
 RUN dpkg-divert --local --rename --add /sbin/initctl
@@ -32,13 +31,20 @@ RUN echo "ldap-auth-config ldap-auth-config/move-to-debconf boolean true" | debc
 RUN echo "ldap-auth-config ldap-auth-config/ldapns/base-dn string dc=cloud,dc=com" | debconf-set-selections
 RUN echo "ldap-auth-config ldap-auth-config/rootbinddn string cn=admin,dc=cloud,dc=com" | debconf-set-selections
 
-ADD krb-ldap-config /etc/auth-client-config/profile.d/krb-ldap-config
+ADD config/krb-ldap-config /etc/auth-client-config/profile.d/krb-ldap-config
 RUN apt-get install -yq ldap-auth-client nscd krb5-user libpam-krb5 libpam-ccreds
 RUN apt-get install -yq ntp ntpdate nmap libsasl2-modules-gssapi-mit
 #RUN auth-client-config -a -p krb_ldap
-ADD setupClient.sh /etc/setupClient.sh
-RUN /bin/bash -c "/etc/setupClient.sh"
-ADD ldap.secret /etc/ldap.secret
+RUN mkdir /utility
+RUN mkdir /utility/ldap
+RUN mkdir /utility/kerberos
+ADD utility/enableLdapPam.sh /utility/ldap/enableLdapPam.sh
+RUN chmod +x /utility/ldap/enableLdapPam.sh
+ADD utility/enableKerbPam.sh /utility/kerberos/enableKerbPam.sh
+RUN chmod +x /utility/kerberos/enableKerbPam.sh
+ADD utility/enableUbuntuPam.sh /utility/enableUbuntuPam.sh
+RUN chmod +x /utility/enableUbuntuPam.sh
+ADD config/ldap.secret /etc/ldap.secret
 RUN chmod 600 /etc/ldap.secret
 RUN apt-get install -yq nmap ntp ntpdate
 # Cleanup Apt
@@ -46,9 +52,9 @@ RUN apt-get autoremove
 RUN apt-get autoclean
 RUN apt-get clean
 
-ADD bootstrap.sh /bootstrap.sh
-RUN chmod +x /bootstrap.sh
+ADD utility/bootstrap.sh /utility/ldap/bootstrap.sh
+RUN chmod +x /utility/ldap/bootstrap.sh
 
 
 EXPOSE 389 636 80
-ENTRYPOINT ["/bootstrap.sh"]
+ENTRYPOINT ["/utility/ldap/bootstrap.sh"]
