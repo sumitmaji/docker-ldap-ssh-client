@@ -81,7 +81,7 @@ initialize() {
      enable_krb
      enableGss
   else
-    /utility/kerberos/enableLdapPam.sh
+    /utility/ldap/enableLdapPam.sh
   fi
 
 }
