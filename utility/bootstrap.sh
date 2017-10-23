@@ -74,6 +74,12 @@ enableGss() {
  echo 'GSSAPIAuthentication yes
  GSSAPICleanupCredentials yes' >> /etc/ssh/sshd_config 
 }
+initializePrincipal() {
+ #Kerberize ssh
+ kadmin -p root/admin -w admin -q "addprinc -randkey host/$(hostname -f)@CLOUD.COM"
+ kadmin -p root/admin -w admin -q "xst -k /etc/krb5.keytab host/$(hostname -f)@CLOUD.COM"
+
+}
 
 initialize() {
   if [ "$ENABLE_KRB" == 'true' ]
@@ -81,6 +87,7 @@ initialize() {
      /utility/kerberos/enableKerbPam.sh
      enable_krb
      enableGss
+     initializePrincipal
   else
     /utility/ldap/enableLdapPam.sh
   fi
