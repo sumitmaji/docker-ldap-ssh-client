@@ -10,6 +10,8 @@
 : ${KDC_ADDRESS:=kerberos.cloud.com}
 : ${LDAP_HOST:=ldap://ldap.cloud.com}
 : ${ENABLE_KRB:=false}
+: ${BASE_DN:=dc=cloud,dc=com}
+
 fix_nameserver() {
   cat>/etc/resolv.conf<<EOF
 nameserver $NAMESERVER_IP
@@ -54,13 +56,13 @@ enable_krb() {
  $DOMAIN_REALM = $REALM
 
 [dbdefaults]
-        ldap_kerberos_container_dn = cn=krbContainer,dc=cloud,dc=com
+        ldap_kerberos_container_dn = cn=krbContainer,$BASE_DN
 
 [dbmodules]
         openldap_ldapconf = {
                 db_library = kldap
-                ldap_kdc_dn = cn=kdc-srv,ou=krb5,dc=cloud,dc=com
-                ldap_kadmind_dn = cn=adm-srv,ou=krb5,dc=cloud,dc=com
+                ldap_kdc_dn = cn=kdc-srv,ou=krb5,$BASE_DN
+                ldap_kadmind_dn = cn=adm-srv,ou=krb5,$BASE_DN
                 ldap_service_password_file = /etc/krb5kdc/service.keyfile
                 ldap_conns_per_server = 5
                 ldap_servers = $LDAP_HOST
@@ -72,7 +74,9 @@ EOF
 enableGss() {
  sed -i 's/UsePAM no/UsePAM yes/' /etc/ssh/sshd_config
  echo 'GSSAPIAuthentication yes
- GSSAPICleanupCredentials yes' >> /etc/ssh/sshd_config 
+ GSSAPICleanupCredentials yes' >> /etc/ssh/sshd_config
+
+echo '/utility/setupUser.sh' >> /etc/bash.bashrc
 }
 initializePrincipal() {
  #Kerberize ssh
@@ -83,7 +87,7 @@ initializePrincipal() {
 
 initialize() {
   if [ "$ENABLE_KRB" == 'true' ]
-   then
+  then
      /utility/kerberos/enableKerbPam.sh
      enable_krb
      enableGss

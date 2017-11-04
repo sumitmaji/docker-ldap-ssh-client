@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker exec -it ldap-client /bin/bash
+docker exec -it -u root ldap-client /bin/bash

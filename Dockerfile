@@ -9,6 +9,7 @@ ARG LDAP_DOMAIN=cloud.com
 ARG LDAP_ORG=CloudInc
 ARG LDAP_HOSTNAME=ldap.cloud.com
 ARG LDAP_PASSWORD=sumit
+ARG BASE_DN="dc=cloud,dc=com"
 
 RUN apt-get update
 # Keep upstart from complaining
@@ -28,13 +29,14 @@ RUN echo "ldap-auth-config ldap-auth-config/dbrootlogin boolean true" | debconf-
 RUN echo "ldap-auth-config ldap-auth-config/binddn string cn=proxyuser,dc=example,dc=net" | debconf-set-selections
 RUN echo "ldap-auth-config ldap-auth-config/ldapns/ldap_version string 3" | debconf-set-selections
 RUN echo "ldap-auth-config ldap-auth-config/move-to-debconf boolean true" | debconf-set-selections
-RUN echo "ldap-auth-config ldap-auth-config/ldapns/base-dn string dc=cloud,dc=com" | debconf-set-selections
-RUN echo "ldap-auth-config ldap-auth-config/rootbinddn string cn=admin,dc=cloud,dc=com" | debconf-set-selections
+RUN echo "ldap-auth-config ldap-auth-config/ldapns/base-dn string $BASE_DN" | debconf-set-selections
+RUN echo "ldap-auth-config ldap-auth-config/rootbinddn string cn=admin,$BASE_DN" | debconf-set-selections
 
 ADD config/krb-ldap-config /etc/auth-client-config/profile.d/krb-ldap-config
 RUN apt-get install -yq ldap-auth-client nscd krb5-user libpam-krb5 libpam-ccreds
 RUN apt-get install -yq ntp ntpdate nmap libsasl2-modules-gssapi-mit
 #RUN auth-client-config -a -p krb_ldap
+
 RUN mkdir /utility
 RUN mkdir /utility/ldap
 RUN mkdir /utility/kerberos
@@ -44,9 +46,21 @@ ADD utility/enableKerbPam.sh /utility/kerberos/enableKerbPam.sh
 RUN chmod +x /utility/kerberos/enableKerbPam.sh
 ADD utility/enableUbuntuPam.sh /utility/enableUbuntuPam.sh
 RUN chmod +x /utility/enableUbuntuPam.sh
-ADD config/ldap.secret /etc/ldap.secret
+#ADD config/ldap.secret /etc/ldap.secret
+RUN echo "$LDAP_PASSWORD" > /etc/ldap.secret
 RUN chmod 600 /etc/ldap.secret
 RUN apt-get install -yq nmap ntp ntpdate
+ADD utility/setupUser.sh /utility/setupUser.sh
+RUN chmod +x /utility/setupUser.sh
+
+#RUN adduser openldap
+#RUN adduser openldap sudo
+#RUN echo openldap:openldap | chpasswd
+#RUN chown -R openldap:openldap /var/lib/ldap
+
+
+#RUN /utility/enableUbuntuPam.sh
+
 # Cleanup Apt
 RUN apt-get autoremove
 RUN apt-get autoclean
