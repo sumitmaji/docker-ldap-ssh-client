@@ -2,15 +2,23 @@
 
 [[ "TRACE" ]] && set -x
 
-: ${REALM:=CLOUD.COM}
-: ${DOMAIN_REALM:=cloud.com}
+source /config
+
+: ${ENABLE_KRB:=$ENABLE_KRB}
+: ${REALM:=$(echo $DOMAIN_NAME | tr 'a-z' 'A-Z')}
+: ${DOMAIN_REALM:=$DOMAIN_NAME}
 : ${KERB_MASTER_KEY:=masterkey}
 : ${KERB_ADMIN_USER:=root}
-: ${KERB_ADMIN_PASS:=admin}
-: ${KDC_ADDRESS:=kerberos.cloud.com}
-: ${LDAP_HOST:=ldap://ldap.cloud.com}
-: ${ENABLE_KRB:=false}
-: ${BASE_DN:=dc=cloud,dc=com}
+: ${KERB_ADMIN_PASS:=$KERB_ADMIN_PASS}
+: ${KDC_ADDRESS:=$KDC_ADDRESS}
+: ${LDAP_HOST:=$LDAP_HOST}
+: ${BASE_DN:=$DC}
+: ${LDAP_PASSWORD:=$LDAP_PASSWORD}
+: ${DC_1:=$DC_1}
+: ${DC_2:=$DC_2}
+
+
+
 
 fix_nameserver() {
   cat>/etc/resolv.conf<<EOF

@@ -5,11 +5,11 @@ MAINTAINER Sumit Kumar Maji
 RUN sed -i "s/^exit 101$/exit 0/" /usr/sbin/policy-rc.d
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG LDAP_DOMAIN=cloud.com
+ARG LDAP_DOMAIN
 ARG LDAP_ORG=CloudInc
-ARG LDAP_HOSTNAME=ldap.cloud.com
-ARG LDAP_PASSWORD=sumit
-ARG BASE_DN="dc=cloud,dc=com"
+ARG LDAP_HOSTNAME
+ARG LDAP_PASSWORD
+ARG BASE_DN
 
 RUN apt-get update
 # Keep upstart from complaining
@@ -68,7 +68,7 @@ RUN apt-get clean
 
 ADD utility/bootstrap.sh /utility/ldap/bootstrap.sh
 RUN chmod +x /utility/ldap/bootstrap.sh
-
+ADD config/config /config
 
 EXPOSE 389 636 80
 ENTRYPOINT ["/utility/ldap/bootstrap.sh"]

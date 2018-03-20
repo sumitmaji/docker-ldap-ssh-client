@@ -1,14 +1,18 @@
 #!/bin/bash
 
 [[ "TRACE" ]] && set -x
-
-: ${REALM:=CLOUD.COM}
-: ${DOMAIN_REALM:=cloud.com}
+source /config
+: ${REALM:=$(echo $DOMAIN_NAME | tr 'a-z' 'A-Z')}
+: ${DOMAIN_REALM:=$DOMAIN_NAME}
 : ${KERB_MASTER_KEY:=masterkey}
 : ${KERB_ADMIN_USER:=root}
-: ${KERB_ADMIN_PASS:=admin}
-: ${KDC_ADDRESS:=kerberos.cloud.com}
-: ${LDAP_HOST:=ldap://ldap.cloud.com}
+: ${KERB_ADMIN_PASS:=$KERB_ADMIN_PASS}
+: ${KDC_ADDRESS:=$KDC_ADDRESS}
+: ${LDAP_HOST:=$LDAP_HOST}
+: ${BASE_DN:=$DC}
+: ${LDAP_PASSWORD:=$LDAP_PASSWORD}
+: ${DC_1:=$DC_1}
+: ${DC_2:=$DC_2}
 
 fix_nameserver() {
   cat>/etc/resolv.conf<<EOF
@@ -54,13 +58,13 @@ create_config() {
  $DOMAIN_REALM = $REALM
 
 [dbdefaults]
-        ldap_kerberos_container_dn = cn=krbContainer,dc=cloud,dc=com
+        ldap_kerberos_container_dn = cn=krbContainer,$BASE_DN
 
 [dbmodules]
         openldap_ldapconf = {
                 db_library = kldap
-                ldap_kdc_dn = cn=kdc-srv,ou=krb5,dc=cloud,dc=com
-                ldap_kadmind_dn = cn=adm-srv,ou=krb5,dc=cloud,dc=com
+                ldap_kdc_dn = cn=kdc-srv,ou=krb5,$BASE_DN
+                ldap_kadmind_dn = cn=adm-srv,ou=krb5,$BASE_DN
                 ldap_service_password_file = /etc/krb5kdc/service.keyfile
                 ldap_conns_per_server = 5
                 ldap_servers = $LDAP_HOST
