@@ -88,8 +88,8 @@ echo '/utility/setupUser.sh' >> /etc/bash.bashrc
 }
 initializePrincipal() {
  #Kerberize ssh
- kadmin -p root/admin -w admin -q "addprinc -randkey host/$(hostname -f)@CLOUD.COM"
- kadmin -p root/admin -w admin -q "xst -k /etc/krb5.keytab host/$(hostname -f)@CLOUD.COM"
+ kadmin -p root/admin -w admin -q "addprinc -randkey host/$(hostname -f)@$REALM"
+ kadmin -p root/admin -w admin -q "xst -k /etc/krb5.keytab host/$(hostname -f)@$REALM"
 
 }
 
@@ -119,9 +119,8 @@ main() {
   else
     start_ldap
   fi
-  if [[ $1 == "-d" ]]; then
-    while true; do sleep 1000; done
-  fi
+
+  while true; do sleep 1000; done
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
