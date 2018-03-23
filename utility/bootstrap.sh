@@ -16,7 +16,7 @@ source /config
 : ${LDAP_PASSWORD:=$LDAP_PASSWORD}
 : ${DC_1:=$DC_1}
 : ${DC_2:=$DC_2}
-
+: ${ENABLE_KUBERNETES:=$ENABLE_KUBERNETES}
 
 
 
@@ -28,7 +28,13 @@ EOF
 }
 
 fix_hostname() {
-  sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
+  #sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
+  if [ "$ENABLE_KUBERNETES" == 'true' ]
+  then
+   cp /etc/hosts ~/tmp
+   sed -i "s/\([0-9\.]*\)\([\t ]*\)\($(hostname -f)\)/\1 $(hostname -f).$DOMAIN_REALM \3/"  ~/tmp
+   cp -f ~/tmp /etc/hosts
+  fi
 }
 
 enable_krb() {
@@ -96,11 +102,13 @@ initializePrincipal() {
 initialize() {
   if [ "$ENABLE_KRB" == 'true' ]
   then
+     fix_hostname
      /utility/kerberos/enableKerbPam.sh
      enable_krb
      enableGss
      initializePrincipal
   else
+    fix_hostname
     /utility/ldap/enableLdapPam.sh
   fi
 
