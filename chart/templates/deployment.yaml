@@ -22,16 +22,16 @@ spec:
       hostname: {{ template "ldapclient.name" . }}
       volumes:
       - name: ldapsecret
-        secret: 
+        secret:
           secretName: ldapsecret
       - name: krbsecret
-        secret: 
+        secret:
           secretName: krbsecret
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: ["/utility/hadoop/bootstrap.sh"]
-          args: ["-d","master"]
+          command: ["/utility/ldap/bootstrap.sh"]
+          args: ["-d"]
           securityContext:
             capabilities:
               add:
@@ -56,10 +56,10 @@ spec:
           volumeMounts:
           - name: ldapsecret
             mountPath: /etc/secret/ldap/
-            readOnly: true 
+            readOnly: true
           - name: krbsecret
             mountPath: /etc/secret/krb/
-            readOnly: true 
+            readOnly: true
           env:
           - name: LDAP_PASSWORD
             valueFrom:
