@@ -45,14 +45,14 @@ spec:
               protocol: {{ .protocol }}
           {{- end }}
     {{- end }}
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
           volumeMounts:
           - name: ldapsecret
             mountPath: /etc/secret/ldap/
