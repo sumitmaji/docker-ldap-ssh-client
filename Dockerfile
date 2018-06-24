@@ -1,4 +1,4 @@
-FROM master.cloud.com:5000/base
+FROM master.cloud.com:5000/base-trusty
 MAINTAINER Sumit Kumar Maji
 
 # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
