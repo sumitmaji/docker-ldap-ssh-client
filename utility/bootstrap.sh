@@ -122,13 +122,17 @@ start_ldap() {
 main() {
   if [ ! -f /ldap_initialized ]; then
     initialize
-    start_ldap 
+    start_ldap
     touch /ldap_initialized
   else
     start_ldap
   fi
 
-  while true; do sleep 1000; done
+  if [[ $1 == "-d" ]]; then
+    while true; do sleep 1000; done
+  else
+    exit 0
+  fi
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
